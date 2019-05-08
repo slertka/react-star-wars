@@ -9,8 +9,10 @@ class App extends React.Component {
     this.state = {
       characters: [],
       searchVal: "",
+      filterVal: "planets", // set default to planets since its the first option
       searchPending: false,
-      hasError: false
+      hasError: false,
+      searchExecuted: false
     };
   }
 
@@ -20,9 +22,15 @@ class App extends React.Component {
     });
   }
 
+  setFilter(inputVal) {
+    this.setState({
+      filterVal: inputVal
+    });
+  }
+
   handleSubmit(e) {
     e.preventDefault();
-    const url = "https://swapi.co/api/people/?search=";
+    const url = `https://swapi.co/api/${this.state.filterVal}/?search=`;
     const searchTerm = this.state.searchVal.includes(" ")
       ? this.state.searchVal.replace(" ", "+")
       : this.state.searchVal;
@@ -31,7 +39,8 @@ class App extends React.Component {
     console.log(searchUrl);
 
     this.setState({
-      searchPending: true
+      searchPending: true,
+      searchExecuted: false
     });
 
     // fetch characters based on search input
@@ -45,7 +54,8 @@ class App extends React.Component {
       .then(resj => {
         this.setState({
           searchPending: false,
-          characters: resj.results
+          characters: resj.results,
+          searchExecuted: true
         });
       })
       .catch(err => {
@@ -76,7 +86,9 @@ class App extends React.Component {
         <SearchForm
           handleSubmit={e => this.handleSubmit(e)}
           setSearchVal={val => this.setSearchVal(val)}
+          setFilter={val => this.setFilter(val)}
           searchVal={this.state.searchVal}
+          searchExecuted={this.state.searchExecuted}
         />
         {searchPending}
         <Results characters={this.state.characters} />
